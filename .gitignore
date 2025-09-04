@@ -1,0 +1,18 @@
+
+
+
+# Python
+__pycache__/
+*.pyc
+
+# Node / n8n data
+n8n_data/
+
+# Local storage for user CVs
+storage/
+
+# Environment variables
+.env
+
+# Logs
+*.log
