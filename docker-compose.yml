@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: applymate_pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: applymate_n8n
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      # ----- n8n basics -----
+      N8N_HOST: ${N8N_HOST}
+      N8N_PORT: ${N8N_PORT}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      # generate this yourself once with: openssl rand -base64 24
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+
+      # ----- Postgres -----
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${PG_DB}
+      DB_POSTGRESDB_USER: ${PG_USER}
+      DB_POSTGRESDB_PASSWORD: ${PG_PASSWORD}
+
+      # ----- Supabase -----
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_BUCKET: ${SUPABASE_BUCKET}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+
+volumes:
+  pg_data:
